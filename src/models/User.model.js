@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
+
         enum: {
             values: ['user', 'admin', 'seller', 'manager', 'delivery'],
             message: 'Role must be either: user,admin,seller,manager,delivery',
@@ -40,7 +41,21 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        trim: true
+        trim: true,
+        validate: {
+            validator: function (v) {
+                return !v || validator.isMobilePhone(v);
+            },
+            message: props => `${props.value} is not a valid phone number!`
+        }
+    },
+    status: {
+        type: String,
+        enum: {
+            values: ['active', 'inactive', 'blocked', 'waiting'],
+            message: 'Status must be either: active,inactive',
+        },
+        default: 'active', // Default status for new users
     },
     passwordChangedAt: Date, // Track when password was last changed
     passwordResetToken: { type: String, select: false },
@@ -73,15 +88,37 @@ userSchema.pre('save', async function (next) {
     }
     next();
 });
+userSchema.virtual('isActive').get(function () {
+    return this.status === 'active';
+});
 userSchema.methods.isPasswordMatch = async function (candidatePassword) {
     if (!this.password) throw new Error('Password field not selected on user document.');
     return await bcrypt.compare(candidatePassword, this.password);
 };
 userSchema.methods.createPasswordResetToken = function () {
     const resetToken = crypto.randomBytes(32).toString('hex');
-    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    this.passwordResetToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
     this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
     return resetToken;
+}
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+    if (this.passwordChangedAt) {
+        const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+        return JWTTimestamp < changedTimestamp;
+    }
+    return false;
+};
+// Add this method to userSchema.methods
+userSchema.methods.createEmailVerificationToken = function () {
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    this.emailVerificationToken = crypto
+        .createHash('sha256')
+        .update(verificationToken)
+        .digest('hex');
+    return verificationToken;
 }
 userSchema.statics.isEmailTaken = async function (email) {
     const user = await this.findOne({ email });

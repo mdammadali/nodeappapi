@@ -1,37 +1,32 @@
-import ApiError from "../utils/api.error.js";
-import httpStatus from 'http-status';
-import User from '../models/User.model.js';
-class AdminAuthService {
-    constructor(userModel) {
-        this.User = userModel;
+import Product from '../models/Product.model.js';
+class AdminProductService {
+    constructor(productModel) {
+        this.Product = productModel;
+    }
+    async all() {
+        const modelData = await this.Product.find({});
+        return modelData;
+    }
+    
+    async update(reqData) {
+        const product = await this.Product.findById(reqData.id);
+        if (!product) {
+            throw new Error('Product not found');
+        }
+        product.title = reqData.title;
+        product.description = reqData.description;
+        product.price = reqData.price;
+        if (reqData.image) {
+            product.image = reqData.image;
+        }
+        await product.save();
+        return product;
     }
 
-    async register(userData) {
-        if (await this.User.isEmailTaken(userData.email)) {
-            throw new ApiError(httpStatus.CONFLICT, 'Email already taken');
-        }
-        const user = new this.User({ email: userData.email, password: userData.password });
-        await user.save();
-        return user;
+    async create(reqData) {
+        const modelData = new this.Product(reqData);
+        await modelData.save();
+        return modelData;
     }
-    async login(email, password) {
-        const user = await this.User.findOne({ email: email }).select('+password');
-        if (!user) {
-            throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-        }
-        const isPasswordMatch = await user.isPasswordMatch(password);
-        if (!isPasswordMatch) {
-            throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-        }
-        const tokens = this._generateTokens(user);
-
-        return { user, ...tokens };
-    }
-    _generateTokens(user) {
-        const access_token = user.createAccessToken();
-        const refresh_token = user.createRefreshToken();
-        return { access_token, refresh_token };
-    }
-
 }
-export default new AdminAuthService(User);
+export default new AdminProductService(Product);
