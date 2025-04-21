@@ -118,8 +118,23 @@ userSchema.methods.createEmailVerificationToken = function () {
         .createHash('sha256')
         .update(verificationToken)
         .digest('hex');
+
+    this.verificationTokenExpiry = Date.now() + 60 * 60 * 1000;
     return verificationToken;
 }
+userSchema.statics.findUserByVerificationToken = async function (token) {
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
+
+    return await this.findOne({
+        emailVerificationToken: hashedToken,
+        isVerified: false, // Ensure user is not yet verified
+        verificationTokenExpiry: { $gt: Date.now() } // Ensure token is not expired
+    });
+};
+
 userSchema.statics.isEmailTaken = async function (email) {
     const user = await this.findOne({ email });
     return !!user;

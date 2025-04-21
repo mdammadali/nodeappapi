@@ -7,4 +7,5 @@ const router = express.Router();
 router.post('/register', publicRegisterValidationRules, handleValidationErrors, publicAuthController.register);
 router.post('/login', publicLoginValidationRules, handleValidationErrors, publicAuthController.login);
 router.post('/forget-password', publicForgetPasswordValidationRules, handleValidationErrors, publicAuthController.forgetPassword);
+router.post('/verify-email', publicAuthController.verifyEmail);
 export default router;
