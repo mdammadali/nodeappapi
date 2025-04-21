@@ -62,6 +62,7 @@ const userSchema = new mongoose.Schema({
     passwordResetTokenExpires: { type: Date, select: false },
     isEmailVerified: { type: Boolean, default: false },
     emailVerificationToken: { type: String, select: false },
+    verificationTokenExpiry: { type: Date, select: false },
 }, {
     timestamps: true,
     toJSON: {
@@ -71,7 +72,9 @@ const userSchema = new mongoose.Schema({
             delete ret.password;
             delete ret.passwordResetToken;
             delete ret.passwordResetTokenExpires;
+            delete ret.isEmailVerified;
             delete ret.emailVerificationToken;
+            delete ret.verificationTokenExpiry;
             return ret;
         }
     },
@@ -91,6 +94,34 @@ userSchema.pre('save', async function (next) {
 userSchema.virtual('isActive').get(function () {
     return this.status === 'active';
 });
+userSchema.statics.isEmailTaken = async function (email) {
+    const user = await this.findOne({ email });
+    return !!user;
+}
+userSchema.methods.createEmailVerificationToken = function () {
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    this.emailVerificationToken = crypto
+        .createHash('sha256')
+        .update(verificationToken)
+        .digest('hex');
+
+    this.verificationTokenExpiry = Date.now() + 60 * 60 * 1000;
+    return verificationToken;
+}
+
+userSchema.statics.findUserByVerificationToken = async function (token) {
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
+
+    return await this.findOne({
+        emailVerificationToken: hashedToken,
+        isEmailVerified: false, // Ensure user is not yet verified
+        verificationTokenExpiry: { $gt: Date.now() } // Ensure token is not expired
+    });
+}
+
 userSchema.methods.isPasswordMatch = async function (candidatePassword) {
     if (!this.password) throw new Error('Password field not selected on user document.');
     return await bcrypt.compare(candidatePassword, this.password);
@@ -110,34 +141,6 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
         return JWTTimestamp < changedTimestamp;
     }
     return false;
-};
-// Add this method to userSchema.methods
-userSchema.methods.createEmailVerificationToken = function () {
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    this.emailVerificationToken = crypto
-        .createHash('sha256')
-        .update(verificationToken)
-        .digest('hex');
-
-    this.verificationTokenExpiry = Date.now() + 60 * 60 * 1000;
-    return verificationToken;
-}
-userSchema.statics.findUserByVerificationToken = async function (token) {
-    const hashedToken = crypto
-        .createHash('sha256')
-        .update(token)
-        .digest('hex');
-
-    return await this.findOne({
-        emailVerificationToken: hashedToken,
-        isVerified: false, // Ensure user is not yet verified
-        verificationTokenExpiry: { $gt: Date.now() } // Ensure token is not expired
-    });
-};
-
-userSchema.statics.isEmailTaken = async function (email) {
-    const user = await this.findOne({ email });
-    return !!user;
 }
 userSchema.methods.createAccessToken = function () {
     const user = this;

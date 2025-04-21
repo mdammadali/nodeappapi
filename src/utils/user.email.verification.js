@@ -13,7 +13,9 @@ const transporter = nodemailer.createTransport({
 const sendVerificationEmail = (toEmail, token) => {
     console.log(toEmail, token);
 
-      const verificationUrl = `http://localhost:3000/auth/verify-email?token=${token}`;
+    //   const verificationUrl = `http://localhost:3000/auth/verify-email?token=${token}`;
+//       const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify-email?token=${plainVerificationToken}`;
+// console.log(verificationUrl);
 
     //   const mailOptions = {
     //     from: 'your-email@gmail.com',

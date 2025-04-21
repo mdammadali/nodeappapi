@@ -6,6 +6,8 @@ import { publicRegisterValidationRules, publicLoginValidationRules, publicForget
 const router = express.Router();
 router.post('/register', publicRegisterValidationRules, handleValidationErrors, publicAuthController.register);
 router.post('/login', publicLoginValidationRules, handleValidationErrors, publicAuthController.login);
-router.post('/forget-password', publicForgetPasswordValidationRules, handleValidationErrors, publicAuthController.forgetPassword);
+// router.post('/forget-password', publicForgetPasswordValidationRules, handleValidationErrors, publicAuthController.forgetPassword);
 router.post('/verify-email', publicAuthController.verifyEmail);
+router.post('/forgot-password', publicAuthController.forgotPassword);
+router.patch('/reset-password/:token', publicAuthController.resetPassword);
 export default router;
