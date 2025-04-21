@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export const adminRegisterValidationRules = [
+export const sellerRegisterValidationRules = [
     // Validate the email field
     body('email')
         .isEmail()
@@ -22,17 +22,21 @@ export const adminRegisterValidationRules = [
         .withMessage('Name must be at least 2 characters long'),
 ]
 
-export const adminLoginValidationRules = [
-    // Validate the email field
+export const sellerLoginValidationRules = [
     body('email')
         .isEmail()
         .withMessage('Invalid email format')
         .normalizeEmail(),
-
-    // Validate the password field
     body('password')
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters long')
         .matches(/\d/)
         .withMessage('Password must contain a number'),
+]
+
+export const sellerForgetPasswordValidationRules = [
+    body('email')
+        .isEmail()
+        .withMessage('Invalid email format')
+        .normalizeEmail(),
 ]

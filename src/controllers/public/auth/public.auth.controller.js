@@ -1,19 +1,15 @@
-import adminAuthService from "../../../services/admin/admin.auth.service.js";
+import publicAuthService from "../../../services/public/public.auth.service.js";
 import ApiResponse from "../../../utils/api.response.js";
 import asyncHandler from "../../../utils/async.handler.js";
 import httpStatus from 'http-status';
 
-class AdminAuthController {
-    constructor() {
-        // Constructor logic
-    }
-
+class PublicAuthController {
     register = asyncHandler(async (req, res) => {
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email and password are required');
         }
-        const user = await adminAuthService.register(req.body);
+        const user = await publicAuthService.register(req.body);
         res.status(httpStatus.CREATED).json(
             new ApiResponse(httpStatus.CREATED, user, 'User registered successfully')
         );
@@ -24,7 +20,7 @@ class AdminAuthController {
         if (!email || !password) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email and password are required');
         }
-        const {user, access_token, refresh_token} = await adminAuthService.login(email, password);
+        const { user, access_token, refresh_token } = await publicAuthService.login(email, password);
         const responseData = {
             user: user.toJSON(),
             access_token,
@@ -34,10 +30,11 @@ class AdminAuthController {
             new ApiResponse(httpStatus.OK, responseData, 'User LoggedIn Successfully')
         );
     });
-
-    logout(req, res) {
-        // Implement logout logic
-        res.json({ message: 'Logout successful' });
-    }
+    forgetPassword = asyncHandler(async (req, res) => {
+        const { email } = req.body;
+        if (!email) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Email and password are required');
+        }
+    })
 }
-export default new AdminAuthController();
+export default new PublicAuthController();

@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import asyncHandler from '../../utils/async.handler.js';
 import ApiResponse from '../../utils/api.response.js';
-import adminUserService from '../../services/admin.user.service.js';
+import adminUserService from '../../services/admin/admin.user.service.js';
 
 class AdminUserController {
     all = asyncHandler(async (req, res) => {

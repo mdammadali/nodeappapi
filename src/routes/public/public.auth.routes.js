@@ -1,0 +1,10 @@
+import express from 'express';
+import publicAuthController from '../../controllers/public/auth/public.auth.controller.js';
+import { handleValidationErrors } from '../../middlewares/validate.middleware.js';
+import { } from '../../validations/admin/admin.auth.validation.js';
+import { publicRegisterValidationRules, publicLoginValidationRules, publicForgetPasswordValidationRules } from '../../validations/public/public.auth.validation.js';
+const router = express.Router();
+router.post('/register', publicRegisterValidationRules, handleValidationErrors, publicAuthController.register);
+router.post('/login', publicLoginValidationRules, handleValidationErrors, publicAuthController.login);
+router.post('/forget-password', publicForgetPasswordValidationRules, handleValidationErrors, publicAuthController.forgetPassword);
+export default router;

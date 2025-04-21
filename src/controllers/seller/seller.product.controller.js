@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import asyncHandler from '../../utils/async.handler.js';
 import ApiResponse from '../../utils/api.response.js';
-import adminProductService from '../../services/admin/admin.product.service.js';
+import adminProductService from '../../services/admin.product.service.js';
 
 class AdminProductController {
     constructor() {

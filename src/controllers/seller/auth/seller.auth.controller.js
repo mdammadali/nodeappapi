@@ -1,19 +1,16 @@
-import adminAuthService from "../../../services/admin/admin.auth.service.js";
+import sellerAuthService from "../../../services/seller/seller.auth.service.js";
 import ApiResponse from "../../../utils/api.response.js";
 import asyncHandler from "../../../utils/async.handler.js";
 import httpStatus from 'http-status';
 
-class AdminAuthController {
-    constructor() {
-        // Constructor logic
-    }
+class sellerAuthController {
 
     register = asyncHandler(async (req, res) => {
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'Email and password are required');
         }
-        const user = await adminAuthService.register(req.body);
+        const user = await sellerAuthService.register(req.body);
         res.status(httpStatus.CREATED).json(
             new ApiResponse(httpStatus.CREATED, user, 'User registered successfully')
         );
@@ -40,4 +37,4 @@ class AdminAuthController {
         res.json({ message: 'Logout successful' });
     }
 }
-export default new AdminAuthController();
+export default new sellerAuthController();

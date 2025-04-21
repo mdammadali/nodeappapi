@@ -1,7 +1,7 @@
-import ApiError from "../utils/api.error.js";
+import ApiError from "../../utils/api.error.js";
 import httpStatus from 'http-status';
-import User from '../models/User.model.js';
-class AdminAuthService {
+import User from '../../models/User.model.js';
+class SellerAuthService {
     constructor(userModel) {
         this.User = userModel;
     }
@@ -10,10 +10,12 @@ class AdminAuthService {
         if (await this.User.isEmailTaken(userData.email)) {
             throw new ApiError(httpStatus.CONFLICT, 'Email already taken');
         }
-        const user = new this.User({ email: userData.email, password: userData.password });
+        const role = userData.role || 'seller';
+        const user = new this.User({ ...userData, role });
         await user.save();
         return user;
     }
+    
     async login(email, password) {
         const user = await this.User.findOne({ email: email }).select('+password');
         if (!user) {
@@ -34,4 +36,4 @@ class AdminAuthService {
     }
 
 }
-export default new AdminAuthService(User);
+export default new SellerAuthService(User);
