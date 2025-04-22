@@ -13,6 +13,7 @@ class PublicAuthController {
             new ApiResponse(httpStatus.CREATED, user, 'User registered successfully')
         );
     });
+
     verifyEmail = asyncHandler(async (req, res) => {
         const { token } = req.query;
         if (!token) {
@@ -33,6 +34,7 @@ class PublicAuthController {
             new ApiResponse(httpStatus.OK, null, 'Email successfully verified!')
         );
     });
+
     login = asyncHandler(async (req, res) => {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -93,7 +95,8 @@ class PublicAuthController {
         res.status(httpStatus.OK).json(
             new ApiResponse(httpStatus.OK, null, 'If your email is registered, you will receive a password reset link.')
         );
-    })
+    });
+
     resetPassword = asyncHandler(async (req, res) => {
         const { token } = req.params;
         const { password, passwordConfirm } = req.body;
